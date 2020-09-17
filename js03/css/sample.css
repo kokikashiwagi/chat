@@ -1,0 +1,16 @@
+.chara{ 
+    display: flex;
+    justify-content: space-between;
+    width: 400px;
+}
+ul {
+    list-style: none;
+  }
+li:hover{
+    /* background-color: aqua; */
+    /* border: 5px solid #3be5ae; */
+    border-top: 5px solid #3be5ae;
+    border-right: 5px solid #3be5ae;
+    border-bottom: 5px solid #3be5ae;
+    border-left: 5px solid #3be5ae;
+}

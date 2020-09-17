@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>Chatアプリ</title>
+</head>
+<link rel="stylesheet" href="css/sample.css">
+<body>
+
+<!-- コンテンツ表示画面 -->
+<div>
+    ◆自分のアイコンを選んでね♪
+    <!-- <ul> -->
+    <ul class="chara">
+        <li class="imgs" data-img="0">
+            <img src="imgs/buke.png" width="100">
+        </li>
+        <li class="imgs" data-img="1">
+            <img src="imgs/caram.png" width="100">
+        </li>
+        <li class="imgs" data-img="2">
+            <img src="imgs/tuku.jpg" width="100">
+        </li>
+
+    </ul>
+</div>
+
+<div>
+    <br>◆チャット入力
+    <!-- <div id="reg_name"> -->
+        <!-- 名前 -->
+        <!-- <input type="text" id="uname"> -->
+        <!-- <button id="register">登録</button> -->
+    <!-- </div> -->
+    <button id="rename">ユーザ変更</button>
+    <div>
+        <textarea id="text" cols="70" rows="5"></textarea><br>
+        <button id="send">送信</button>
+    </div>
+</div>
+
+
+<!-- <div id="output"> -->
+<br><br>
+◆チャット画面
+<div id="output" style="height: 300px; width: 500px; overflow:auto;border:1px solid black;">
+    <table id="table1">
+    </table>
+</div>
+
+
+<!--/ コンテンツ表示画面 -->
+
+
+<!-- JQuery -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<!-- JQuery -->
+
+
+<!--** 以下Firebase **-->
+<!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/7.20.0/firebase.js"></script>
+
+<!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+
+<script>
+  // Your web app's Firebase configuration
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const ref = firebase.database().ref();//.ref()→ユニークキーを自動でふる。決めるときは()に何か入れる
+
+
+
+//最初のアイコン選択、前のをひきつぐ
+let d=0;
+d =localStorage.getItem("jibun");
+if(d==0){
+        $(".imgs[data-img='0']").css("border","5px solid red");
+}    
+if(d==1){
+        $(".imgs[data-img='1']").css("border","5px solid red");
+}    
+if(d==2){
+        $(".imgs[data-img='2']").css("border","5px solid red");
+}    
+
+
+//アイコン処理
+
+const img =["buke.png","caram.png","tuku.jpg"];
+$(".imgs").on("click",function(){
+    d=$(this).attr("data-img");
+    if(d==0){
+        if(confirm("ネコにするんだ！いいね！")){
+            $(this).css("border","5px solid red");
+            $('.imgs').not(this).css("border","");
+            localStorage.setItem("jibun",d);
+            location.reload();
+        }
+    }    
+    if(d==1){
+        if(confirm("イヌにするんだ、趣味悪いね")){
+            $(this).css("border","5px solid red");
+            $('.imgs').not(this).css("border","");
+            localStorage.setItem("jibun",d);
+            location.reload();
+        }
+    }
+        
+    if(d==2){
+        if(confirm("ヤクルトファン？")){
+            $(this).css("border","5px solid red");
+            $('.imgs').not(this).css("border","");
+            localStorage.setItem("jibun",d);
+            location.reload();
+        }
+    }    
+});
+
+
+//関数定義_空行削除　ここやる
+// function delete_blank_line(text){
+//     text=text.trim();
+//     text=text.replace(/(\r?\n)+/g,"\n");
+//     return text;
+// }
+
+
+//関数定義_Send
+function send(){
+    var h = new Date();
+    var year = h.getFullYear();
+    var month = h.getMonth();
+    var week = h.getDay();
+    var day = h.getDate();
+    var hours = h.getHours();
+    var minutes = h.getMinutes();
+    month =  month+1;//なぜか月が-1になってるので
+
+    var t = month +"/" + day + "/"+ hours + ":" + minutes;
+    // var t = year + "年"+ month +"月" + day + "日"+ hours + "時" + minutes + "分";
+    // const uname = $("#uname").val();
+    const text  = $("#text").val();
+
+
+    if(text == ""){
+        alert("テキストを入力してください");
+        return
+    }
+    const msg   = {
+        // uname:uname,
+        text:text,
+        time:t,
+        icon:d
+    }
+    ref.push(msg);//set=決まった名前、push=ユニーク
+    //最下部までスクロール
+    $('#output').scrollTop($('#output')[0].scrollHeight);
+
+}
+
+// $("#rename").hide();
+
+$("#register").on("click",function(){
+    $("#rename").show();
+    $("#reg_name").hide();
+    // $("#uname").hide();
+    
+});
+
+//名前変更
+$("#rename").on("click",function(){
+    $("#reg_name").show();
+    $("#rename").hide();
+});
+
+
+
+//文字を送信 
+$("#send").on("click",function(){
+    send();
+});
+
+//受信処理
+ref.on("child_added",function(data){
+    const v = data.val(); //送信されたオブジェクトを取得
+    const k = data.key; //ユニークキーを取得
+    const hh = ''+v.text+'<img src="imgs/'+img[v.icon]+'" width="100"></p>';//改行なし
+    const h = '<img src="imgs/'+img[v.icon]+'" width="100">'+v.text+'</p>';//改行なし
+    // const h = '<img src="imgs/'+img[v.icon]+'" width="100">'+v.text+'<br>'+v.time+'</p>';//改行なし
+    const hv = ''+v.time+'</p>'
+    const sp = '&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp';   
+    console.log(d);
+    if(v.icon==d){
+        $("#table1").append(sp+hh);    
+        $("#table1").append(sp+hv);    
+    }
+    else{
+        $("#table1").append(h);    
+        $("#table1").append(hv);    
+    }
+
+});
+
+//イベント情報取得
+$("#text").on("keydown",function(e){
+    if(e.keyCode == 13){
+        send();
+    }
+
+});
+
+</script>
+
+
+
+
+
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
